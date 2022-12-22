@@ -4,12 +4,12 @@ library(tidync)
 library(here)
 
 # Read MPA data
-mpas = readRDS(here::here("CA_MPA_polygons.Rds"))
+mpas = readRDS(here::here("data", "CA_MPA_polygons.Rds"))
 
 # Build dataset access URL
 # The Copernicus Marine Data Store requires account credentials for persistent access
-un = 'ibrunjes'
-pw = 'Scc00sMPA'
+un = ##
+pw = ##
 datasetID = 'cmems_mod_glo_phy_my_0.083_P1D-m'
 url = paste ("https://",un, ":", pw,"@my.cmems-du.eu/thredds/dodsC/",datasetID, sep = "")
 
@@ -46,7 +46,7 @@ mpas_mod <- mpas %>%
 # Pull and save data in chunks for each MPA lat/long
 for (i in 1:nrow(mpas_mod)) {
   current_mpa = mpas_mod[i,]
-
+  
   # Pull bottom temperature data for MPA
   print(paste(i, ": Pulling data for", current_mpa$name))
   mpa_data <- glorys %>%
@@ -70,11 +70,11 @@ for (i in 1:nrow(mpas_mod)) {
     merge(y = time_map, by = "time", all.x = TRUE) %>% 
     select(mpa_name, date, bottomT, long_dd, lat_dd, long_approx, lat_approx)
   
-  write_csv(mpa_data_mod, here::here("chunked_results", paste0("mpa_bottomT_", i, ".csv")))
+  write_csv(mpa_data_mod, here::here("data", "chunked_results", paste0("mpa_bottomT_", i, ".csv")))
 }
 
 # Read all data chunks into single dataframe
-MPAs_Temp_Data = list.files(path = here::here("chunked_results"), pattern = "*.csv", full.names = T) %>%
+MPAs_Temp_Data = list.files(path = here::here("data", "chunked_results"), pattern = "*.csv", full.names = T) %>%
   lapply(read_csv) %>% 
   bind_rows()
 
@@ -82,7 +82,7 @@ MPAs_Temp_Data = list.files(path = here::here("chunked_results"), pattern = "*.c
 MPAs_No_Data = mpas_mod %>% filter(!name %in% unique(MPAs_Temp_Data$mpa_name))
 
 # Write data to file
-#MPAs_Temp_Data %>% write_csv(here::here("CA_MPA_glorys_bottomT.csv"))
+#MPAs_Temp_Data %>% write_csv(here::here("data", "CA_MPA_glorys_bottomT.csv"))
 
 ### To pull in the additional information from the columns of the original MPA table, join on "name"=="mpa_name"
 ### Though it may be better to subset/filter the temp data externally
